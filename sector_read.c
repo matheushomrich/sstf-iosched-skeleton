@@ -10,9 +10,11 @@
 #include <unistd.h>
 
 #define BUFFER_LENGTH 512
-#define DISK_SZ	1073741824
+#define DISK_SZ 1073741824
+#define FORKS 8
 
-int main(){
+int main()
+{
 	int ret, fd, pid, i;
 	unsigned int pos;
 	char buf[BUFFER_LENGTH];
@@ -23,21 +25,23 @@ int main(){
 	system("echo 3 > /proc/sys/vm/drop_caches"); // limpa buffers e caches de disco
 
 	printf("Configuring scheduling queues...\n");
-	system("echo 2 > /sys/block/sdb/queue/nomerges"); // desabilita merges de i/o
-	system("echo 4 > /sys/block/sdb/queue/max_sectors_kb"); //4Kb para o tamanho máximo de uma requisição e
-	system("echo 0 > /sys/block/sdb/queue/read_ahead_kb"); //para que o sistema faça a leitura de mais conteúdo do que o que foi requisitado.
+	system("echo 2 > /sys/block/sdb/queue/nomerges");
+	system("echo 4 > /sys/block/sdb/queue/max_sectors_kb"); 
+	system("echo 0 > /sys/block/sdb/queue/read_ahead_kb");
+
+	printf("Forking processes to put stress on disk scheduler...\n");
+	for (int i = 0; i < FORKS; i++)
+		fork();
 
 	srand(getpid());
 
 	fd = open("/dev/sdb", O_RDWR);
-	if (fd < 0){
+	if (fd < 0) {
 		perror("Failed to open the device...");
 		return errno;
 	}
 
-	strcpy(buf, "hello world!");
-
-	for (i = 0; i < 50; i++){
+	for (i = 0; i < 10; i++) {
 		pos = (rand() % (DISK_SZ >> 9));
 		/* Set position */
 		lseek(fd, pos * 512, SEEK_SET);
