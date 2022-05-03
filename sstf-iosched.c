@@ -1,3 +1,4 @@
+
 /*
  * SSTF IO Scheduler
  *
@@ -11,6 +12,8 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 
+int *lastValue; 
+
 /* SSTF data structure. */
 struct sstf_data {
 	struct list_head queue;
@@ -22,6 +25,8 @@ static void sstf_merged_requests(struct request_queue *q, struct request *rq,
 	list_del_init(&next->queuelist);
 }
 
+// Mexer nessa
+// Sempre armazenar o valor do ultimo bloco lido e ler o próximo bloco cuja memória está mais próxima do ultimo bloco lido
 /* Esta função despacha o próximo bloco a ser lido. */
 static int sstf_dispatch(struct request_queue *q, int force){
 	struct sstf_data *nd = q->elevator->elevator_data;
@@ -45,6 +50,7 @@ static int sstf_dispatch(struct request_queue *q, int force){
 	return 0;
 }
 
+// Mexer nessa
 static void sstf_add_request(struct request_queue *q, struct request *rq){
 	struct sstf_data *nd = q->elevator->elevator_data;
 	char direction = 'R';
