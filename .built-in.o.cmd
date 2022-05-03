@@ -1,0 +1,1 @@
+cmd_/home/labredes/Documentos/linuxdistro/buildroot/modules/sstf-iosched-skeleton/built-in.o :=  rm -f /home/labredes/Documentos/linuxdistro/buildroot/modules/sstf-iosched-skeleton/built-in.o; ar rcSTPD /home/labredes/Documentos/linuxdistro/buildroot/modules/sstf-iosched-skeleton/built-in.o
