@@ -1,4 +1,3 @@
-
 /*
  * SSTF IO Scheduler
  *
@@ -32,36 +31,60 @@ static int sstf_dispatch(struct request_queue *q, int force){
 	struct sstf_data *nd = q->elevator->elevator_data;
 	char direction = 'R';
 	struct request *rq;
+
+	printk(KERN_EMERG "ENTREI NA FUNC");
+
+	if (lastValue == 0) {
+		rq = list_first_entry_or_null(&nd->queue, struct request, queuelist);
+		lastValue = blk_rq_pos(rq);
+		list_del_init(&rq->queuelist); // deleta o elemento (rq) da lista
+		elv_dispatch_sort(q, rq); // dispacha pro hardware o elemento (rq) da lista (q)
+		printk(KERN_EMERG "PRIMEIRO VALOR");
+		return 1;
+	} else {
+		struct list_head *ptr;
+		list_for_each(ptr, &nd->queue) {
+			rq = list_entry(ptr, struct request, queuelist);
+			if (blk_rq_pos(rq) > lastValue) { //TODO PROBLEMA TA AQUI PEDRO, RESOLVE
+				lastValue = blk_rq_pos(rq);
+				// printk(KERN_EMERG "[SSTF] dsp %c %llu\n", direction, blk_rq_pos(rq));
+				list_del_init(&rq->queuelist); 
+				elv_dispatch_sort(q, rq);
+				return 1;
+			}
+		}
+		
+	}
+	return 0;
+}
+
+
+
+
+//versao do sor
+/*static int sstf_dispatch(struct request_queue *q, int force){
+	struct sstf_data *nd = q->elevator->elevator_data;
+	char direction = 'R';
+	struct request *rq;
+
 	/* Aqui deve-se retirar uma requisição da fila e enviá-la para processamento.
 	 * Use como exemplo o driver noop-iosched.c. Veja como a requisição é tratada.
 	 *
 	 * Antes de retornar da função, imprima o sector que foi atendido.
-	 */
-	 
+	 *
 
 	rq = list_first_entry_or_null(&nd->queue, struct request, queuelist);
-	if (lastValue == 0) {
-		rq = list_first_entry_or_null(&nd->queue, struct request, queuelist);
-		lastValue = blk_rq_pos(rq);
-		printk(KERN_EMERG "PRIMEIRO VALOR");
-	} else {
-		struct list_head *ptr;
-		list_for_each(ptr, &nd->queue) {
-			rq = list_entry(ptr, struct request, queueList)
-			if (blk_rq_pos(rq) > lastValue) {
-				printk(KERN_EMERG "[SSTF] %llu\n", blk_rq_pos(rq));
-			}
-		} // itera toda a lista
-		printk(KERN_EMERG "SEGUNDO VALOR");
-	}
 	if (rq) {
-		list_del_init(&rq->queuelist); // deleta o elemento (rq) da lista
-		elv_dispatch_sort(q, rq); // dispacha pro hardware o elemento (rq) da lista (q)
-		// printk(KERN_EMERG "[SSTF] dsp %c %llu\n", direction, blk_rq_pos(rq));
+		list_del_init(&rq->queuelist);
+		elv_dispatch_sort(q, rq);
+		printk(KERN_EMERG "[SSTF] dsp %c %llu\n", direction, blk_rq_pos(rq));
+
 		return 1;
 	}
 	return 0;
-}
+}*/
+
+
 
 // Mexer nessa
 static void sstf_add_request(struct request_queue *q, struct request *rq){
@@ -73,9 +96,15 @@ static void sstf_add_request(struct request_queue *q, struct request *rq){
 	 *
 	 * Antes de retornar da função, imprima o sector que foi adicionado na lista.
 	 */
-
+	struct list_head *ptr;
+	list_for_each(ptr, &nd->queue) {
+		rq = list_entry(ptr, struct request, queuelist);
+		if (blk_rq_pos(rq) > lastValue) {
+			printk(KERN_EMERG "[SSTF] add %llu\n", blk_rq_pos(rq));
+		}
+	}
 	list_add_tail(&rq->queuelist, &nd->queue);
-	printk(KERN_EMERG "[SSTF] add %c %llu\n", direction, blk_rq_pos(rq));
+	// printk(KERN_EMERG "[SSTF] add %c %llu\n", direction, blk_rq_pos(rq));
 }
 
 static int sstf_init_queue(struct request_queue *q, struct elevator_type *e){
