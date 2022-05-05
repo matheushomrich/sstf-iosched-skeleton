@@ -32,14 +32,7 @@ static int sstf_dispatch(struct request_queue *q, int force){
 	struct sstf_data *nd = q->elevator->elevator_data;
 	char direction = 'R';
 	struct request *rq;
-	/* Aqui deve-se retirar uma requisição da fila e enviá-la para processamento.
-	 * Use como exemplo o driver noop-iosched.c. Veja como a requisição é tratada.
-	 *
-	 * Antes de retornar da função, imprima o sector que foi atendido.
-	 */
-	 
 
-	rq = list_first_entry_or_null(&nd->queue, struct request, queuelist);
 	if (lastValue == 0) {
 		rq = list_first_entry_or_null(&nd->queue, struct request, queuelist);
 		lastValue = blk_rq_pos(rq);
@@ -49,9 +42,10 @@ static int sstf_dispatch(struct request_queue *q, int force){
 		list_for_each(ptr, &nd->queue) {
 			rq = list_entry(ptr, struct request, queueList)
 			if (blk_rq_pos(rq) > lastValue) {
+				lastValue = blk_rq_pos(rq);
 				printk(KERN_EMERG "[SSTF] %llu\n", blk_rq_pos(rq));
 			}
-		} // itera toda a lista
+		}
 		printk(KERN_EMERG "SEGUNDO VALOR");
 	}
 	if (rq) {
@@ -75,7 +69,7 @@ static void sstf_add_request(struct request_queue *q, struct request *rq){
 	 */
 
 	list_add_tail(&rq->queuelist, &nd->queue);
-	printk(KERN_EMERG "[SSTF] add %c %llu\n", direction, blk_rq_pos(rq));
+	// printk(KERN_EMERG "[SSTF] add %c %llu\n", direction, blk_rq_pos(rq));
 }
 
 static int sstf_init_queue(struct request_queue *q, struct elevator_type *e){
