@@ -67,7 +67,13 @@ static void sstf_add_request(struct request_queue *q, struct request *rq){
 	 *
 	 * Antes de retornar da função, imprima o sector que foi adicionado na lista.
 	 */
-
+	struct list_head *ptr;
+	list_for_each(ptr, &nd->queue) {
+		rq = list_entry(ptr, struct request, queueList)
+		if (blk_rq_pos(rq) > lastValue) {
+			printk(KERN_EMERG "[SSTF] add %llu\n", blk_rq_pos(rq));
+		}
+	}
 	list_add_tail(&rq->queuelist, &nd->queue);
 	// printk(KERN_EMERG "[SSTF] add %c %llu\n", direction, blk_rq_pos(rq));
 }
