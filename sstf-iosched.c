@@ -36,23 +36,23 @@ static int sstf_dispatch(struct request_queue *q, int force){
 	if (lastValue == 0) {
 		rq = list_first_entry_or_null(&nd->queue, struct request, queuelist);
 		lastValue = blk_rq_pos(rq);
+		list_del_init(&rq->queuelist); // deleta o elemento (rq) da lista
+		elv_dispatch_sort(q, rq); // dispacha pro hardware o elemento (rq) da lista (q)
 		printk(KERN_EMERG "PRIMEIRO VALOR");
+		return 1;
 	} else {
 		struct list_head *ptr;
 		list_for_each(ptr, &nd->queue) {
 			rq = list_entry(ptr, struct request, queueList)
 			if (blk_rq_pos(rq) > lastValue) {
 				lastValue = blk_rq_pos(rq);
-				printk(KERN_EMERG "[SSTF] %llu\n", blk_rq_pos(rq));
+				// printk(KERN_EMERG "[SSTF] dsp %c %llu\n", direction, blk_rq_pos(rq));
+				list_del_init(&rq->queuelist); 
+				elv_dispatch_sort(q, rq);
+				return 1;
 			}
 		}
-		printk(KERN_EMERG "SEGUNDO VALOR");
-	}
-	if (rq) {
-		list_del_init(&rq->queuelist); // deleta o elemento (rq) da lista
-		elv_dispatch_sort(q, rq); // dispacha pro hardware o elemento (rq) da lista (q)
-		// printk(KERN_EMERG "[SSTF] dsp %c %llu\n", direction, blk_rq_pos(rq));
-		return 1;
+		
 	}
 	return 0;
 }
