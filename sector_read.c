@@ -9,9 +9,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#define BUFFER_LENGTH 512
+#define BUFFER_LENGTH 1024
 #define DISK_SZ 1073741824
-#define FORKS 8
+#define FORKS 16
 
 int main()
 {
