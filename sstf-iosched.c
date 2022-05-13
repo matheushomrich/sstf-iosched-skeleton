@@ -35,13 +35,15 @@ static int sstf_dispatch(struct request_queue *q, int force){
 
 	rq = list_first_entry_or_null(&nd->queue, struct request, queuelist);
 
-	list_for_each(fistNode, &nd->queue) {	
-		currentNode = list_entry(fistNode, struct request, queuelist);
+	if(rq){
+		list_for_each(fistNode, &nd->queue) {	
+			currentNode = list_entry(fistNode, struct request, queuelist);
 
-		if (abs(lastValue - blk_rq_pos(rq)) >= abs(lastValue - blk_rq_pos(currentNode))) {
-			rq = currentNode;
-		}
-	}   
+			if (abs(lastValue - blk_rq_pos(rq)) >= abs(lastValue - blk_rq_pos(currentNode))) {
+				rq = currentNode;
+			}
+		}   
+	}
 	
 	if (rq) {
 		lastValue = blk_rq_pos(rq);
